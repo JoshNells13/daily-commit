@@ -16,7 +16,7 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --local user.joshua.plk08@gmail.com "EMAIL_GITHUB_KAMU"
+          git config --local user.email "joshua.plk08@gmail.com"
           git config --local user.name "JoshNells13"
           git add .
           git commit -m "daily update" || echo "no changes"
