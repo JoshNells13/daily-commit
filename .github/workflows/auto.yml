@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Generate 10 commits via GitHub API
         run: |
-          FILE="commit.txt"
+          FILE="update.txt"
 
           # Ambil SHA file (kalau ada)
           SHA=$(curl -s \
