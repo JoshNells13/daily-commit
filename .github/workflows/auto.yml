@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update file
         run: |
@@ -20,5 +22,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add commit.txt
-          git commit -m "daily update"
-          git push
+          git commit -m "daily update" || echo "No changes"
+
+          # FIX ERROR: fetch first
+          git pull --rebase
+
+          git push https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/JoshNells13/daily-commit.git
