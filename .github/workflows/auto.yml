@@ -1,30 +1,41 @@
-name: Daily Commit
+name: Commit cheat
 
 on:
-  schedule:
-    - cron: "0 0 * * *"
-  workflow_dispatch:
 
-permissions:
-  contents: write
+  push:
+    branches:
+      - main
+      
+  schedule:
+  - cron: "0 1/4 * * *"
 
 jobs:
-  run:
+  auto_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Set global directory
+        run: git config --global --add safe.directory /github/workspace
+      - uses: actions/checkout@v3     
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+         persist-credentials: false
+         fetch-depth: 1
 
-      - name: Update file
+      - name: Modify last update
         run: |
-          echo "$(date)" >> update.txt
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add commit.txt
-          git commit -m "daily update" || echo "No changes"
-
-          # FIX ERROR: fetch first
-          git pull --rebase
-
-          git push https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/JoshNells13/daily-commit.git
+          cat > LAST_UPDATED
+          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
+          echo $d > LAST_UPDATED
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "joshua.plk08@gmail.com"
+          git config --local user.name "JoshNells13"
+          git add -A
+          git commit -m "Bukan Lisa smaga"
+          
+      - name: GitHub Push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          force: true
+          directory: "."
+          github_token: ${{ secrets.GITHUB_TOKEN }}
