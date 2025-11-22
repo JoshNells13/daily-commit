@@ -1,41 +1,32 @@
-name: Commit cheat
+name: Daily Commit
 
 on:
-
-  push:
-    branches:
-      - main
-      
   schedule:
-  - cron: "0 1/4 * * *"
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  auto_commit:
+  commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Set global directory
-        run: git config --global --add safe.directory /github/workspace
-      - uses: actions/checkout@v3     
-        with:
-         persist-credentials: false
-         fetch-depth: 1
+      - name: Update update.txt via API
+        run: |
+          DATE=$(date)
 
-      - name: Modify last update
-        run: |
-          cat > LAST_UPDATED
-          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
-          echo $d > LAST_UPDATED
-          
-      - name: Commit changes
-        run: |
-          git config --local user.email "joshua.plk08@gmail.com"
-          git config --local user.name "JoshNells13"
-          git add -A
-          git commit -m "Bukan Lisa smaga"
-          
-      - name: GitHub Push
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          force: true
-          directory: "."
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          CONTENT=$(printf "%s" "$DATE" | base64)
+
+          FILE="commit.txt"
+
+          SHA=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/JoshNells13/daily-commit/contents/$FILE \
+            | jq -r '.sha')
+
+          curl -X PUT \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"message\": \"Daily update\", \"content\": \"$CONTENT\", \"sha\": \"$SHA\"}" \
+            https://api.github.com/repos/JoshNells13/daily-commit/contents/$FILE
